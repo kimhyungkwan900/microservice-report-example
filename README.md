@@ -1,6 +1,3 @@
-<img width="1490" height="1208" alt="image" src="https://github.com/user-attachments/assets/b4b8bd99-191a-45f1-9fb3-b99ffb4708ce" />
-# 숙소예약# 숙소예약
-
 <img width="240" height="240" alt="야놀자" src="https://github.com/user-attachments/assets/a9a8b84e-21d2-49b7-8e80-1a6ee3d4b4fa" />
 <img width="240" height="240" alt="여기어때" src="https://github.com/user-attachments/assets/479e92b5-a638-4b89-b962-1a8418745ff4" />
 
