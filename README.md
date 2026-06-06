@@ -1,8 +1,8 @@
-
+<img width="1490" height="1208" alt="image" src="https://github.com/user-attachments/assets/b4b8bd99-191a-45f1-9fb3-b99ffb4708ce" />
 # 숙소예약# 숙소예약
 
 <img width="240" height="240" alt="야놀자" src="https://github.com/user-attachments/assets/a9a8b84e-21d2-49b7-8e80-1a6ee3d4b4fa" />
-<img width="512" height="512" alt="여기어때" src="https://github.com/user-attachments/assets/479e92b5-a638-4b89-b962-1a8418745ff4" />
+<img width="240" height="240" alt="여기어때" src="https://github.com/user-attachments/assets/479e92b5-a638-4b89-b962-1a8418745ff4" />
 
 
 # Table of contents
@@ -94,15 +94,14 @@ CQRS: 고객은 본인의 예약 및 결제 현황을 실시간 화면을 통해
 
 ### 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
 
-![image](https://user-images.githubusercontent.com/487999/79684167-3ecd2f00-826a-11ea-806a-957362d197e3.png)
 
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e7b9341a-35b3-4ad8-9d02-b9aa96ed2fd3" />
     - 고객이 메뉴를 선택하여 주문한다 (ok)
     - 고객이 결제한다 (ok)
     - 주문이 되면 주문 내역이 입점상점주인에게 전달된다 (ok)
     - 상점주인이 확인하여 요리해서 배달 출발한다 (ok)
 
-![image](https://user-images.githubusercontent.com/487999/79684170-47256a00-826a-11ea-9777-e16fafff519a.png)
-
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e7b9341a-35b3-4ad8-9d02-b9aa96ed2fd3" />
     - 고객이 주문을 취소할 수 있다 (ok)
     - 주문이 취소되면 배달이 취소된다 (ok)
     - 고객이 주문상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok) 
