@@ -94,12 +94,14 @@ CQRS: 고객은 본인의 예약 및 결제 현황을 실시간 화면을 통해
 
 
 <img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e7b9341a-35b3-4ad8-9d02-b9aa96ed2fd3" />
+
 - 고객이 숙소 객실을 선택하여 예약 신청을 한다. (ok)
 - 예약 신청과 동시에 결제 처리가 진행된다. (ok)
 - 결제가 완료되면 숙소 시스템에서 이를 수신하여 객실 재고를 차감하고 예약을 접수 상태로 변경한다. (ok)
 - 점주(Host)가 예약을 확인하고 최종 [예약승인] 처리를 한다. (ok)
 
 <img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e7b9341a-35b3-4ad8-9d02-b9aa96ed2fd3" />
+
 - 고객이 예약을 취소할 수 있다. (ok)
 - 예약을 취소하면 결제 환불과 객실 재고 복구가 연쇄적으로 일어난다. (ok - Saga 패턴/보상 트랜잭션 적용)
 - 고객은 자신의 예약 상태와 결제 이력 등을 마이페이지를 통해 한눈에 조회할 수 있다. (View-green sticker 추가로 CQRS 적용 ok)
