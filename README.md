@@ -86,7 +86,8 @@ CQRS: 고객은 본인의 예약 및 결제 현황을 실시간 화면을 통해
 
 ## Event Storming 결과
 
-![image](https://user-images.githubusercontent.com/487999/79683646-63bfa300-8266-11ea-9bc5-c0b650507ac8.png)
+
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e7b9341a-35b3-4ad8-9d02-b9aa96ed2fd3" />
 
 
 ### 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
