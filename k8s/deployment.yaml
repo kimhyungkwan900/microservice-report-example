@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accommodation-reservation
+  labels:
+    app: accommodation-reservation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accommodation-reservation
+  template:
+    metadata:
+      labels:
+        app: accommodation-reservation
+    spec:
+      containers:
+        - name: accommodation-reservation
+          image: Pop2bubble/accommodation-reservation:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_OPTS
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+          readinessProbe:
+            httpGet:
+              path: /api/rooms
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/rooms
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"

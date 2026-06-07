@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: accommodation-reservation
+  labels:
+    app: accommodation-reservation
+spec:
+  type: NodePort
+  selector:
+    app: accommodation-reservation
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30080
