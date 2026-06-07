@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: accommodation-reservation
-          image: Pop2bubble/accommodation-reservation:latest
+          image: pop2bubble/accommodation-reservation:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

@@ -2,6 +2,7 @@ package com.hotel.Accommodation.reservation.service;
 
 import com.hotel.Accommodation.reservation.domain.*;
 import com.hotel.Accommodation.reservation.dto.ReserveRequest;
+import com.hotel.Accommodation.reservation.dto.event.ReservationCreated;
 import com.hotel.Accommodation.reservation.repository.PaymentHistoryRepository;
 import com.hotel.Accommodation.reservation.repository.ReservationRepository;
 import com.hotel.Accommodation.reservation.repository.RoomInventoryRepository;
@@ -19,6 +20,7 @@ public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final PaymentHistoryRepository paymentHistoryRepository;
 	private final RoomInventoryRepository roomInventoryRepository;
+	private final org.springframework.context.ApplicationEventPublisher applicationEventPublisher;
 
 	@Transactional(readOnly = true)
 	public List<Reservation> findAllReservations() {
@@ -50,7 +52,9 @@ public class ReservationService {
 				.checkOutDate(request.getCheckOutDate())
 				.build();
 
-		return reservationRepository.save(reservation);
+		Reservation saved = reservationRepository.save(reservation);
+		applicationEventPublisher.publishEvent(new ReservationCreated(saved));
+		return saved;
 	}
 
 	public Reservation pay(Long reservationId) {

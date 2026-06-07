@@ -382,7 +382,7 @@ HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/reserva
 
 - 부하가 발생하는 도중, 새로운 버전의 이미지로 payment 서비스 배포를 갱신합니다.
 ```
-kubectl set image deployment/payment payment=Pop2bubble/payment:v2
+kubectl set image deployment/payment payment=pop2bubble/payment:v2
 ```
 
 - siege 화면에서 Availability(성공률)가 100% 미만으로 떨어졌는지 확인합니다.
