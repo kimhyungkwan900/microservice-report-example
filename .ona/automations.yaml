@@ -1,0 +1,39 @@
+tasks:
+    build:
+        name: Build application
+        command: |
+            ./gradlew bootJar -x test --no-daemon
+        triggeredBy:
+            - manual
+
+    test:
+        name: Run tests
+        command: |
+            ./gradlew test --no-daemon
+        triggeredBy:
+            - manual
+
+    docker-build:
+        name: Build Docker image
+        command: |
+            PUSH=false ./scripts/docker-publish.sh
+        triggeredBy:
+            - manual
+
+    docker-push:
+        name: Push Docker image
+        command: |
+            ./scripts/docker-publish.sh
+        triggeredBy:
+            - manual
+
+services:
+    app:
+        name: Spring Boot application
+        commands:
+            start: |
+                ./gradlew bootRun --no-daemon
+            ready: |
+                curl -s -o /dev/null http://localhost:8080
+        triggeredBy:
+            - manual
