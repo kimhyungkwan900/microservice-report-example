@@ -185,27 +185,34 @@ public class Payment {
     private String status;
 
 }
+```
+
+- Entity Pattern과 Repository Pattern을 적용하여 JPA를 통해 다양한 데이터소스 유형(RDB or NoSQL)에 대한 별도의 쿼리 작성 없이 데이터 접근 어댑터를 자동 생성하도록 Spring Data REST의 PagingAndSortingRepository를 적용하였습니다.
 
 ```
-- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
-```
-package fooddelivery;
+package com.hotel.payment.repository;
 
+import com.hotel.payment.domain.Payment;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-public interface 결제이력Repository extends PagingAndSortingRepository<결제이력, Long>{
+@RepositoryRestResource(collectionResourceRel="payments", path="payments")
+public interface PaymentRepository extends PagingAndSortingRepository<Payment, Long> {
 }
 ```
+
 - 적용 후 REST API 의 테스트
+- 로컬 환경에서 Kafka를 띄운 상태로 각 서비스의 동작과 비동기 호출을 테스트한 결과입니다.
+
 ```
-# app 서비스의 주문처리
-http localhost:8081/orders item="통닭"
+# 1. reservation 서비스의 객실 예약 요청 (101호, 50000원)
+http POST localhost:8081/reservations roomId=101 price=50000
 
-# store 서비스의 배달처리
-http localhost:8083/주문처리s orderId=1
+# 2. payment 서비스에서 결제 내역 생성 확인 (Kafka 비동기 수신)
+http GET localhost:8082/payments
 
-# 주문 상태 확인
-http localhost:8081/orders/1
+# 3. mypage 서비스에서 전체 예약/결제 상태 통합 확인 (CQRS)
+http GET localhost:8084/mypages
 
 ```
 
