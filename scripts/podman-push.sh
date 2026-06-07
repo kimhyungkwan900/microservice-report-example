@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOCKERHUB_USERNAME="${1:-Pop2bubble}"
+DOCKERHUB_USERNAME="${1:-pop2bubble}"
 IMAGE_NAME="${2:-accommodation-reservation}"
 TAG="${3:-latest}"
 FULL_IMAGE="${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${TAG}"

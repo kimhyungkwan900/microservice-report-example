@@ -1,5 +1,5 @@
 param(
-    [string]$DockerHubUsername = "Pop2bubble",
+    [string]$DockerHubUsername = "pop2bubble",
 
     [string]$ImageName = "accommodation-reservation",
     [string]$Tag = "latest"

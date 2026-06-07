@@ -1,6 +1,34 @@
 <img width="240" height="240" alt="야놀자" src="https://github.com/user-attachments/assets/a9a8b84e-21d2-49b7-8e80-1a6ee3d4b4fa" />
 <img width="240" height="240" alt="여기어때" src="https://github.com/user-attachments/assets/479e92b5-a638-4b89-b962-1a8418745ff4" />
 
+# Gitpod/Ona Docker Hub 배포
+
+Gitpod/Ona 환경에서 Docker 이미지를 빌드하고 Docker Hub로 바로 푸시할 수 있도록 `.ona/automations.yaml`에 수동 작업을 정의했다.
+
+필요한 secret 또는 환경변수:
+
+```bash
+DOCKERHUB_USERNAME=pop2bubble
+DOCKERHUB_TOKEN=<docker-hub-access-token>
+IMAGE_NAME=accommodation-reservation
+TAG=latest
+```
+
+실행:
+
+```bash
+gitpod automations task start docker-build
+gitpod automations task start docker-push
+```
+
+직접 실행할 수도 있다.
+
+```bash
+PUSH=false ./scripts/docker-publish.sh
+DOCKERHUB_USERNAME=pop2bubble DOCKERHUB_TOKEN=<token> ./scripts/docker-publish.sh
+```
+
+Docker CLI가 없다면 Dev Container를 다시 빌드한다. `.devcontainer/devcontainer.json`에는 Docker-in-Docker와 Java 21 기능이 포함되어 있다.
 
 # Table of contents
 

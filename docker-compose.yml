@@ -1,7 +1,7 @@
 services:
   accommodation-reservation:
     build: .
-    image: pop2bubble/accommodation-reservation:latest
+    image: ${DOCKERHUB_USERNAME:-pop2bubble}/${IMAGE_NAME:-accommodation-reservation}:${TAG:-latest}
     container_name: accommodation-reservation
     ports:
       - "8080:8080"
