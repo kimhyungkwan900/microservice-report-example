@@ -144,6 +144,7 @@ CQRS: 고객은 본인의 예약 및 결제 현황을 실시간 화면을 통해
 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC(Bounded Context)별로 대변되는 마이크로 서비스들을 Spring Boot(Java 21)와 Gradle을 이용하여 구현하였습니다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같습니다. (각 서비스의 포트 넘버는 8081 ~ 8084를 사용합니다.)
 
 ```
+
 # 예약(Reservation) 서비스
 cd reservation
 ./gradlew bootRun
@@ -159,6 +160,7 @@ cd accommodation
 # 마이페이지(Mypage - CQRS) 서비스
 cd mypage
 ./gradlew bootRun
+
 ```
 
 ## DDD 의 적용
@@ -167,6 +169,7 @@ cd mypage
 - 식별자나 필드명에 한글을 사용할 경우 발생하는 빌드 오류 및 Kafka Topic 인코딩 문제를 원천 차단하기 위해, 현업의 유비쿼터스 랭귀지를 영문으로 매핑하여 적용했습니다. 또한 Lombok을 활용하여 보일러플레이트 코드(Getter/Setter)를 최소화했습니다.
 
 ```
+
 package com.hotel.payment.domain;
 
 import jakarta.persistence.*;
@@ -185,11 +188,13 @@ public class Payment {
     private String status;
 
 }
+
 ```
 
 - Entity Pattern과 Repository Pattern을 적용하여 JPA를 통해 다양한 데이터소스 유형(RDB or NoSQL)에 대한 별도의 쿼리 작성 없이 데이터 접근 어댑터를 자동 생성하도록 Spring Data REST의 PagingAndSortingRepository를 적용하였습니다.
 
 ```
+
 package com.hotel.payment.repository;
 
 import com.hotel.payment.domain.Payment;
@@ -199,12 +204,14 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(collectionResourceRel="payments", path="payments")
 public interface PaymentRepository extends PagingAndSortingRepository<Payment, Long> {
 }
+
 ```
 
 - 적용 후 REST API 의 테스트
 - 로컬 환경에서 Kafka를 띄운 상태로 각 서비스의 동작과 비동기 호출을 테스트한 결과입니다.
 
 ```
+
 # 1. reservation 서비스의 객실 예약 요청 (101호, 50000원)
 http POST localhost:8081/reservations roomId=101 price=50000
 
