@@ -1,0 +1,10 @@
+services:
+  accommodation-reservation:
+    build: .
+    image: Pop2bubble/accommodation-reservation:latest
+    container_name: accommodation-reservation
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+    restart: unless-stopped
