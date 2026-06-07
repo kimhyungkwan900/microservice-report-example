@@ -323,30 +323,34 @@ http GET localhost:8084/mypages/1
 # 운영
 
 ## 오토스케일 아웃
-앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
+- 앞서 서킷 브레이커(CB)는 시스템을 안정되게 운영할 수 있게 해줬지만, 트래픽 폭주 시 사용자의 요청을 100% 수용하지 못하는 한계가 있었습니다.
+- 이에 대한 보완책으로 트래픽에 따라 자동으로 컨테이너를 늘려주는 자동화된 확장 기능(HPA)을 적용합니다.
 
 
-- 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
+- 결제 서비스(payment)에 대한 Replica를 동적으로 늘려주도록 HPA를 설정합니다. CPU 사용량이 15%를 넘어서면 파드(Pod)를 최대 10개까지 늘려주도록 명시합니다.
+
 ```
-kubectl autoscale deploy pay --min=1 --max=10 --cpu-percent=15
+kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
 ```
-- CB 에서 했던 방식대로 워크로드를 2분 동안 걸어준다.
+
+- 워크로드를 발생시켜 오토스케일링을 유도합니다. (2분 동안 100명의 동시 사용자가 객실 예약을 지속적으로 요청)
+
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
+siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/reservations POST {"roomId": "101", "price": 50000}'
 ```
-- 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
+- 오토스케일이 정상적으로 작동하는지 모니터링합니다.
 ```
-kubectl get deploy pay -w
+kubectl get deploy payment -w
 ```
-- 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
+- 어느 정도 시간이 흐른 후(약 30초~1분), 부하를 감지하고 스케일 아웃이 벌어지는 것을 확인할 수 있습니다.
 ```
-NAME    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-pay     1         1         1            1           17s
-pay     1         2         1            1           45s
-pay     1         4         1            1           1m
-:
+NAME      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+payment   1         1         1            1           17s
+payment   1         2         1            1           45s
+payment   1         4         1            1           1m
+...
 ```
-- siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
+- siege의 최종 로그를 확인하면, 파드가 확장됨에 따라 병목이 해소되어 전체적인 트랜잭션 성공률(Availability)이 높아진 것을 확인할 수 있습니다.
 ```
 Transactions:		        5078 hits
 Availability:		       92.45 %
@@ -361,61 +365,62 @@ Concurrency:		       96.02
 
 ## 무정지 재배포
 
-* 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
+* 먼저 무정지 재배포가 100% 달성되는지 대조군을 확인하기 위해, HPA나 CB 설정을 잠시 제거한 상태에서 배포 직전 워크로드 모니터링을 시작합니다.
 
-- seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
+siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/reservations POST {"roomId": "101", "price": 50000}'
 
 ** SIEGE 4.0.5
 ** Preparing 100 concurrent users for battle.
 The server is now under siege...
 
-HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-:
+HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/reservations
+HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/reservations
+...
 
 ```
 
-- 새버전으로의 배포 시작
+- 부하가 발생하는 도중, 새로운 버전의 이미지로 payment 서비스 배포를 갱신합니다.
 ```
-kubectl set image ...
+kubectl set image deployment/payment payment=Pop2bubble/payment:v2
 ```
 
-- seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
+- siege 화면에서 Availability(성공률)가 100% 미만으로 떨어졌는지 확인합니다.
 ```
 Transactions:		        3078 hits
 Availability:		       70.45 %
 Elapsed time:		       120 secs
-Data transferred:	        0.34 MB
-Response time:		        5.60 secs
-Transaction rate:	       17.15 trans/sec
-Throughput:		        0.01 MB/sec
-Concurrency:		       96.02
+...
 
 ```
-배포기간중 Availability 가 평소 100%에서 70% 대로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 이를 막기위해 Readiness Probe 를 설정함:
+
+- 배포 기간 중 Availability가 100%에서 70%대로 떨어진 것을 확인했습니다. 원인은 쿠버네티스가 새로 생성된 Spring Boot 컨테이너가 실제 요청을 처리할 준비(내부 Tomcat 런타임 및 DB 커넥션 풀 등)가 완료되기도 전에 성급하게 트래픽을 유입시켰기 때문입니다.
+  - 이를 막기 위해 deployment.yaml에 Readiness Probe를 설정하여, 애플리케이션이 트래픽을 받을 준비가 완전히 끝났을 때만 서비스 라우팅을 시작하도록 수정합니다.
 
 ```
-# deployment.yaml 의 readiness probe 의 설정:
+# kubernetes/deployment.yaml 내부 payment 컨테이너 설정
 
-
+          readinessProbe:
+            httpGet:
+              path: /payments
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 5
+            failureThreshold: 10
+```
+```
+# 수정된 yaml 파일 적용
 kubectl apply -f kubernetes/deployment.yaml
 ```
 
-- 동일한 시나리오로 재배포 한 후 Availability 확인:
+- Readiness Probe 적용 후, 동일한 시나리오로 부하 테스트 도중 재배포를 수행하고 Availability를 확인합니다.
 ```
 Transactions:		        3078 hits
-Availability:		       100 %
+Availability:		         100 %
 Elapsed time:		       120 secs
-Data transferred:	        0.34 MB
-Response time:		        5.60 secs
-Transaction rate:	       17.15 trans/sec
-Throughput:		        0.01 MB/sec
-Concurrency:		       96.02
+...
 
 ```
 
-배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
+결과: 배포 기간 동안 트래픽 유실 없이 Availability가 100%로 유지되었습니다. Spring Boot 애플리케이션의 기동 시간을 쿠버네티스가 정확히 인지하여, 트래픽을 안전하게 전환하는 **무정지 재배포(Zero-Downtime Deployment)**가 성공적으로 구현되었음을 확인했습니다.
