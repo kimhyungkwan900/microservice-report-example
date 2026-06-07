@@ -141,64 +141,48 @@ CQRS: 고객은 본인의 예약 및 결제 현황을 실시간 화면을 통해
 
 # 구현:
 
-분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC(Bounded Context)별로 대변되는 마이크로 서비스들을 Spring Boot(Java 21)와 Gradle을 이용하여 구현하였습니다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같습니다. (각 서비스의 포트 넘버는 8081 ~ 8084를 사용합니다.)
 
 ```
-cd app
-mvn spring-boot:run
+# 예약(Reservation) 서비스
+cd reservation
+./gradlew bootRun
 
-cd pay
-mvn spring-boot:run 
+# 결제(Payment) 서비스
+cd payment
+./gradlew bootRun
 
-cd store
-mvn spring-boot:run  
+# 숙소(Accommodation) 서비스
+cd accommodation
+./gradlew bootRun
 
-cd customer
-python policy-handler.py 
+# 마이페이지(Mypage - CQRS) 서비스
+cd mypage
+./gradlew bootRun
 ```
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다. 하지만, 일부 구현에 있어서 영문이 아닌 경우는 실행이 불가능한 경우가 있기 때문에 계속 사용할 방법은 아닌것 같다. (Maven pom.xml, Kafka의 topic id, FeignClient 의 서비스 id 등은 한글로 식별자를 사용하는 경우 오류가 발생하는 것을 확인하였다)
+- 각 서비스 내에 도출된 핵심 Aggregate Root 객체를 Entity로 선언하였습니다. (예시: Payment 마이크로서비스).
+- 식별자나 필드명에 한글을 사용할 경우 발생하는 빌드 오류 및 Kafka Topic 인코딩 문제를 원천 차단하기 위해, 현업의 유비쿼터스 랭귀지를 영문으로 매핑하여 적용했습니다. 또한 Lombok을 활용하여 보일러플레이트 코드(Getter/Setter)를 최소화했습니다.
 
 ```
-package fooddelivery;
+package com.hotel.payment.domain;
 
-import javax.persistence.*;
-import org.springframework.beans.BeanUtils;
-import java.util.List;
+import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+@Table(name="payment_table")
+@Data
+public class Payment {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String orderId;
-    private Double 금액;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-    public Double get금액() {
-        return 금액;
-    }
-
-    public void set금액(Double 금액) {
-        this.금액 = 금액;
-    }
+    private Long reservationId;
+    private Double amount;
+    private String status;
 
 }
 
