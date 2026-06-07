@@ -227,88 +227,98 @@ http GET localhost:8084/mypages
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
-결제가 이루어진 후에 상점시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 상점 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
- 
-- 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 본 시스템은 마이크로서비스 간의 결합도를 낮추고 시스템의 확장성을 확보하기 위해 Apache Kafka를 활용한 이벤트 기반 아키텍처(Event-Driven Architecture)를 적용하였습니다.
+- REST API(동기 통신)의 한계인 '단일 서비스 장애 시 전체 시스템 마비(Cascading Failure)' 문제를 해결하기 위해 핵심 트랜잭션을 비동기(Pub/Sub)로 처리합니다.
+
+### 이벤트 발행 (Publish): 예약 서비스 (Reservation)
+- 고객이 숙소를 예약하면, Reservation 서비스는 데이터베이스에 예약 정보를 저장함과 동시에 ReservationCreated 이벤트를 Kafka 토픽으로 발행(Publish)합니다.
+- JPA의 Entity Lifecycle Annotation(@PostPersist)을 활용하여 DB 저장과 이벤트 발행의 생명주기를 일치시켰습니다.
  
 ```
-package fooddelivery;
+
+package com.hotel.reservation.domain;
+
+import jakarta.persistence.*;
+import org.springframework.beans.BeanUtils;
+import lombok.Data;
 
 @Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+@Table(name="reservation_table")
+@Data
+public class Reservation {
 
- ...
-    @PrePersist
-    public void onPrePersist(){
-        결제승인됨 결제승인됨 = new 결제승인됨();
-        BeanUtils.copyProperties(this, 결제승인됨);
-        결제승인됨.publish();
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+    private String roomId;
+    private Double price;
+    private String status;
+
+    @PostPersist
+    public void onPostPersist(){
+        // 예약이 DB에 성공적으로 저장된 직후, Kafka로 이벤트 발행
+        ReservationCreated reservationCreated = new ReservationCreated();
+        BeanUtils.copyProperties(this, reservationCreated);
+        
+        // (MSAEZ 제공 AbstractEvent의 publish 메서드 활용 또는 KafkaTemplate 사용)
+        reservationCreated.publishAfterCommit(); 
     }
-
 }
-```
-- 상점 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
-package fooddelivery;
 
-...
+### 이벤트 구독 (Subscribe): 결제 및 숙소 서비스 (Policy Handler)
+
+- 발행된 이벤트는 결제(Payment) 서비스와 숙소(Accommodation) 서비스가 각자의 관심사에 맞게 구독(Subscribe)합니다.
+- spring-boot-starter-kafka 라이브러리의 @KafkaListener를 사용하여 이벤트를 수신하며, 예약 서비스가 일시적으로 다운되더라도 큐에 저장된 이벤트를 통해 데이터의 최종 일관성(Eventual Consistency)을 보장합니다.
+
+```
+package com.hotel.payment.infra;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Service;
+import com.hotel.payment.domain.*;
 
 @Service
-public class PolicyHandler{
+public class PolicyHandler {
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
+    @Autowired
+    PaymentRepository paymentRepository;
 
-        if(결제승인됨.isMe()){
-            System.out.println("##### listener 주문정보받음 : " + 결제승인됨.toJson());
-            // 주문 정보를 받았으니, 요리를 슬슬 시작해야지..
+    // 카프카의 'hotel-booking-topic'을 구독하여 예약 생성 이벤트 수신
+    @KafkaListener(topics = "hotel-booking-topic", groupId = "payment-group")
+    public void wheneverReservationCreated_ProcessPayment(@Payload String eventString) {
+        
+        // 이벤트 페이로드 파싱 및 결제 승인 로직 실행
+        if(eventString.contains("ReservationCreated")) {
+            ReservationCreated event = parseEvent(eventString, ReservationCreated.class);
             
+            Payment payment = new Payment();
+            payment.setReservationId(event.getId());
+            payment.setAmount(event.getPrice());
+            payment.setStatus("결제승인완료"); // Payment 상태 업데이트
+            
+            paymentRepository.save(payment);
         }
     }
-
 }
 
 ```
-실제 구현을 하자면, 카톡 등으로 점주는 노티를 받고, 요리를 마친후, 주문 상태를 UI에 입력할테니, 우선 주문정보를 DB에 받아놓은 후, 이후 처리는 해당 Aggregate 내에서 하면 되겠다.:
+
+### CQRS 패턴을 이용한 통합 조회 (Mypage)
+
+- 사용자가 자신의 예약 및 결제 상태를 한 번에 조회할 때, 여러 마이크로서비스를 넘나들며 데이터를 조인(Join)하는 것은 성능 저하를 유발합니다.
+- 이를 해결하기 위해 CQRS(Command and Query Responsibility Segregation) 패턴을 적용한 Mypage 서비스를 별도로 구축했습니다.
+- Mypage 서비스는 Kafka를 통해 ReservationCreated, PaymentApproved 등의 이벤트를 모두 구독하여 읽기 전용(Read-Model) DB에 최신 상태로 캐싱해 둡니다.
   
 ```
-  @Autowired 주문관리Repository 주문관리Repository;
-  
-  @StreamListener(KafkaProcessor.INPUT)
-  public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
-
-      if(결제승인됨.isMe()){
-          카톡전송(" 주문이 왔어요! : " + 결제승인됨.toString(), 주문.getStoreId());
-
-          주문관리 주문 = new 주문관리();
-          주문.setId(결제승인됨.getOrderId());
-          주문관리Repository.save(주문);
-      }
-  }
+  # 사용자가 마이페이지를 조회할 때, 복잡한 조인 없이 CQRS DB에서 즉시 응답
+http GET localhost:8084/mypages/1
 
 ```
-
-상점 시스템은 주문/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 상점시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
-```
-# 상점 서비스 (store) 를 잠시 내려놓음 (ctrl+c)
-
-#주문처리
-http localhost:8081/orders item=통닭 storeId=1   #Success
-http localhost:8081/orders item=피자 storeId=2   #Success
-
-#주문상태 확인
-http localhost:8080/orders     # 주문상태 안바뀜 확인
-
-#상점 서비스 기동
-cd 상점
-mvn spring-boot:run
-
-#주문상태 확인
-http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 확인
-```
-
 
 # 운영
 
