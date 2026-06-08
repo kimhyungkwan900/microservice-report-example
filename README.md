@@ -251,11 +251,7 @@ Content-Type: application/json
 
 # 분석/설계
 
-## AS-IS 조직 (Horizontally-Aligned)
-  ![image](https://user-images.githubusercontent.com/487999/79684144-2a893200-826a-11ea-9a01-79927d3a0107.png)
-
-## TO-BE 조직 (Vertically-Aligned)
-  ![image](https://user-images.githubusercontent.com/487999/79684159-3543c700-826a-11ea-8d5f-a3fc0c4cad87.png)
+<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e389dd64-7af9-49df-9a4b-a18e53354bed" />
 
 ## Event Storming 결과
 
