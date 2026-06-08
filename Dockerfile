@@ -16,6 +16,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN apk add --no-cache curl
 USER appuser
 
 COPY --from=builder /app/build/libs/*.jar app.jar
@@ -23,5 +24,7 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8080
 
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

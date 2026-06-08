@@ -1,10 +1,11 @@
-param(
+﻿param(
     [string]$DockerHubUsername = "pop2bubble",
 
     [string]$ImageName = "accommodation-reservation",
     [string]$Tag = "latest"
 )
 
+. "$PSScriptRoot\_encoding.ps1"
 $ErrorActionPreference = "Stop"
 
 $fullImage = "${DockerHubUsername}/${ImageName}:${Tag}"

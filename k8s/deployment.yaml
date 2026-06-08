@@ -23,6 +23,10 @@ spec:
           env:
             - name: JAVA_OPTS
               value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+            - name: APP_KAFKA_ENABLED
+              value: "false"
           readinessProbe:
             httpGet:
               path: /api/rooms

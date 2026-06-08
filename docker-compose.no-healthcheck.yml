@@ -1,0 +1,10 @@
+# 헬스체크 없이 빠른 기동/대조군 테스트용
+services:
+  accommodation-reservation:
+    healthcheck:
+      disable: true
+
+  gateway:
+    depends_on:
+      accommodation-reservation:
+        condition: service_started
