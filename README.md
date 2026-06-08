@@ -251,7 +251,7 @@ Content-Type: application/json
 
 # 분석/설계
 
-<img width="1280" height="720" alt="image" src="https://github.com/user-attachments/assets/e389dd64-7af9-49df-9a4b-a18e53354bed" />
+<img width="1280" height="720" alt="AS-IS, TO-BE 모델" src="https://github.com/user-attachments/assets/435516fc-0ca8-434c-b5e4-fa8d343089db" />
 
 ## Event Storming 결과
 
