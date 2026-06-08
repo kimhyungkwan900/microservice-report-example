@@ -121,7 +121,7 @@ Accommodation-reservation/
 .\scripts\docker-publish.ps1 -Tag v2
 ```
 
-환경 변수 (선택):
+환경 변수:
 
 ```bash
 DOCKERHUB_USERNAME=pop2bubble
