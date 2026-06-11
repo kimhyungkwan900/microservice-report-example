@@ -118,14 +118,6 @@ cd Accommodation-reservation
 docker compose down
 ```
 
-## 로컬 개발 (Gradle)
-
-```powershell
-.\gradlew.bat bootRun
-```
-
-Kafka 없이 실행하려면 `src/test/resources/application.properties` 와 같이 `app.kafka.enabled=false` 를 설정합니다.
-
 ---
 
 # 프로젝트 구조
