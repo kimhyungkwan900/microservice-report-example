@@ -36,7 +36,7 @@
 
 ## 사전 요구사항
 
-- Docker Desktop (또는 Docker Engine + Compose v2)
+- Docker Desktop (또는 Docker Engine + Compose v2) / 테스트는 Docker Desktop 에서 진행되었습니다.
 - PowerShell 5.1 이상 (Windows)
 
 ## 1. 전체 스택 기동
