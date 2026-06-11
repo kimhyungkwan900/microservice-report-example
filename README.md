@@ -59,49 +59,57 @@ cd Accommodation-reservation
 ```
 
 ```powershell
-[1] GET /api/rooms?checkInDate=2026-06-11&checkOutDate=2026-06-13                                                       [                                                                                                                           {                                                                                                                           "id":  1,
-        "roomId":  101,
-        "stockCount":  3,
-        "roomName":  "디럭스 더블",
-        "invDate":  "2026-06-06"
-    },
-    {
-        "id":  2,                                                                                                               "roomId":  102,                                                                                                         "stockCount":  5,                                                                                                       "roomName":  "스스탠탠다다드드 트트윈윈",                                                                                           "invDate":  "2026-06-06"
-    },
-    {
-        "id":  3,
-        "roomId":  103,
-        "stockCount":  2,
-        "roomName":  "패밀리 스위트",
-        "invDate":  "2026-06-06"                                                                                            }                                                                                                                   ]                                                                                                                                                                                                                                               [2] POST /api/reservations (roomId=101, stock=3)
-{
-    "id":  1,
-    "roomId":  101,
-    "userId":  "customer01",
-    "price":  120000,
-    "status":  "REQUESTED",
-    "checkInDate":  "2026-06-11",
-    "checkOutDate":  "2026-06-13"
-}
+[1] GET /api/rooms?checkInDate=2026-06-11&checkOutDate=2026-06-13
+        {
+            "id":  1,
+            "roomId":  101,
+            "stockCount":  3,
+            "roomName":  "디럭스 더블",
+            "invDate":  "2026-06-06"
+        },
+        {
+            "id":  2,
+            "roomId":  102,
+            "stockCount":  5,
+            "roomName":  "스탠다드 트윈",
+            "invDate":  "2026-06-06"
+        },
+        {
+            "id":  3,
+            "roomId":  103,
+            "stockCount":  2,
+            "roomName":  "패밀리 스위트",
+            "invDate":  "2026-06-06"
+        }
+[2] POST /api/reservations (roomId=101, stock=3)
+        {
+            "id":  1,
+            "roomId":  101,
+            "userId":  "customer01",
+            "price":  120000,
+            "status":  "REQUESTED",
+            "checkInDate":  "2026-06-11",
+            "checkOutDate":  "2026-06-13"
+        }
 
 [3] POST /api/reservations/1/pay
-{
-    "id":  1,
-    "roomId":  101,
-    "userId":  "customer01",
-    "price":  120000,
-    "status":  "PAID",
-    "checkInDate":  "2026-06-11",
-    "checkOutDate":  "2026-06-13"
-}
+        {
+            "id":  1,
+            "roomId":  101,
+            "userId":  "customer01",
+            "price":  120000,
+            "status":  "PAID",
+            "checkInDate":  "2026-06-11",
+            "checkOutDate":  "2026-06-13"
+        }
 
 [4] GET /api/payments
-{
-    "id":  1,
-    "reservationId":  1,
-    "price":  120000,
-    "type":  "PAYMENT"
-}
+        {
+            "id":  1,
+            "reservationId":  1,
+            "price":  120000,
+            "type":  "PAYMENT"
+        }
 ```
 
 ## 3. 종료
