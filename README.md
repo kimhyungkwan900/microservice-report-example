@@ -12,7 +12,7 @@
 | 로컬 진입점 | `http://localhost:8080` (nginx API Gateway) |
 | API Prefix | `/api` |
 | Java | 21 |
-| DB | H2 (인메모리) |
+| DB | H2 |
 | 메시지 브로커 | Apache Kafka |
 
 ---
