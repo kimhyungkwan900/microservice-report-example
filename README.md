@@ -49,6 +49,9 @@ cd Accommodation-reservation
 기동 구성: **Kafka** + **Spring Boot 앱** + **nginx Gateway**  
 약 1분 후 `http://localhost:8080` 접속.
 
+<img width="1258" height="989" alt="image" src="https://github.com/user-attachments/assets/e9117160-e013-4f1a-9827-331217689aa0" />
+
+
 ## 2. API 테스트
 
 ```powershell
