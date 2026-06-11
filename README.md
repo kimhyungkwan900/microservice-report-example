@@ -8,7 +8,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| Docker Hub | `pop2bubble/accommodation-reservation:latest` |
+| Docker Hub | `[pop2bubble/accommodation-reservation:latest](https://hub.docker.com/repository/docker/pop2bubble/accommodation-reservation/general)` |
 | 로컬 진입점 | `http://localhost:8080` (nginx API Gateway) |
 | API Prefix | `/api` |
 | Java | 21 |
