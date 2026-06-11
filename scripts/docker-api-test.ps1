@@ -18,21 +18,20 @@ function Invoke-ApiErrorMessage {
     return $ErrorRecord.Exception.Message
 }
 
-Write-Host "==> API 게이트웨이 라우트 테스트 ($BaseUrl)" -ForegroundColor Cyan
+Write-Host "==> API 게이트웨이 라우팅 테스트 ($BaseUrl)" -ForegroundColor Cyan
 
-# [1] GET /api/rooms
+# [1] GET /api/rooms (하드코딩을 피하기 위해 조회하고자 하는 기간을 쿼리 스트링으로 전달)
 Write-Host "`n[1] GET /api/rooms?checkInDate=$CheckIn&checkOutDate=$CheckOut"
 $rooms = Invoke-Utf8Api -Uri "$BaseUrl/api/rooms?checkInDate=$CheckIn&checkOutDate=$CheckOut" -Method Get
 Write-Utf8Json $rooms
 
 $availableRoom = $rooms | Where-Object { $_.stockCount -gt 0 } | Select-Object -First 1
 if (-not $availableRoom) {
-    throw "예약 가능한 객실이 없습니다... (모든 객실 수 = 0) docker compose restart 로 H2 데이터를 초기화하거나 다른 roomId를 사용하세요."
+    throw "예약 가능한 객실이 없습니다.. (모든 객실 수 = 0) docker compose restart 로 H2 데이터를 초기화하거나 다른 roomId를 사용하세요."
 }
 
 # [2] POST /api/reservations 
 Write-Host "`n[2] POST /api/reservations (roomId=$($availableRoom.roomId), stock=$($availableRoom.stockCount))"
-
 
 $totalPrice = 120000 
 if ($availableRoom.pricePerNight) {
@@ -62,7 +61,6 @@ $paid = Invoke-Utf8Api -Uri "$BaseUrl/api/reservations/$($reservation.id)/pay" -
 Write-Utf8Json $paid
 
 # [4] GET /api/payments
-# 특정 예약에 파생된 결제 조회가 가능하도록 쿼리 파라미터 구조 확장 대비 (필요시 호출 형태 정합성 유지)
 Write-Host "`n[4] GET /api/payments"
 $payments = Invoke-Utf8Api -Uri "$BaseUrl/api/payments" -Method Get
 Write-Utf8Json $payments
