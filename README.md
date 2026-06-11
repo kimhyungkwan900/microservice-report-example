@@ -401,10 +401,13 @@ public void wheneverReservationCreated(@Payload ReservationCreated event) { ... 
 또는 curl:
 
 ```bash
-curl http://localhost:8080/api/rooms
+1. 객실 조회 (조회하고자 하는 투숙 기간을 쿼리 파라미터로 전달)
+curl "http://localhost:8080/api/rooms?checkInDate=2026-06-11&checkOutDate=2026-06-13"
+
+2. 예약 생성 (조회한 기간과 일치하는 날짜를 Body에 담아 요청)
 curl -X POST http://localhost:8080/api/reservations \
   -H "Content-Type: application/json" \
-  -d '{"roomId":101,"userId":"customer01","price":120000,"checkInDate":"2026-06-10","checkOutDate":"2026-06-12"}'
+  -d '{"roomId":101,"userId":"customer01","price":120000,"checkInDate":"2026-06-11","checkOutDate":"2026-06-13"}'
 ```
 
 Kafka 이벤트 발행 여부는 앱 로그에서 확인합니다.
